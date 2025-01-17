@@ -7,7 +7,7 @@ import {
   Alert,
 } from "react-native";
 import React, { useState } from "react";
-import { useAuth } from "./authContext";
+import { useAuth } from "../context/authContext";
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");

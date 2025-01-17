@@ -7,79 +7,25 @@ import {
   Pressable,
   Platform,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
-import { useAuth } from "../(auth)/authContext";
+import { useAudit } from "../context/auditContext";
+import { useAuth } from "../context/authContext";
+import { useNavigation } from "@react-navigation/native";
 
 const Form = () => {
-  // const [dateOfBirth, setDateOfBirth] = useState("");
-  // const [date, setDate] = useState(new Date());
-  // const [showPicker, setShowPicker] = useState(false);
-
-  // const toggleDatepicker = () => {
-  //   setShowPicker(!showPicker);
-  // };
-
-  // const onChange = ({ type }, selectedDate) => {
-  //   if (type == "set") {
-  //     const currentDate = selectedDate;
-  //     setDate(currentDate);
-
-  //     if (Platform.OS === "android") {
-  //       toggleDatepicker();
-  //       setDateOfBirth(formatDate(currentDate));
-  //     }
-  //   } else {
-  //     toggleDatepicker();
-  //   }
-  // };
-
-  // const formatDate = (rawDate) => {
-  //   let date = new Date(rawDate);
-
-  //   let year = date.getFullYear();
-  //   let month = date.getMonth() + 1;
-  //   let day = date.getDate();
-
-  //   month = month < 10 ? `0${month}` : month;
-  //   day = day < 10 ? `0${day}` : day;
-
-  //   return `${day}-${month}-${year}`;
-  // };
-
-  // return (
-  //   <View style={styles.container}>
-  //     {showPicker && (
-  //       <DateTimePicker
-  //         mode="date"
-  //         display="spinner"
-  //         value={date}
-  //         onChange={onChange}
-  //       />
-  //     )}
-
-  //     <Text style={styles.label}>Tanggal Audit</Text>
-
-  //     {!showPicker && (
-  //       <Pressable onPress={toggleDatepicker}>
-  //         <TextInput
-  //           style={styles.input}
-  //           placeholder="Sat Aug 21 2025"
-  //           value={dateOfBirth}
-  //           onChangeText={setDateOfBirth}
-  //           editable={false}
-  //         />
-  //       </Pressable>
-  //     )}
-  //   </View>
-  // );
-  const [auditTitle, setAuditTitle] = useState("");
-  const [auditArea, setAuditArea] = useState("");
-  const [auditDate, setAuditDate] = useState("");
+  const [title, setTitle] = useState("");
+  const [area, setArea] = useState("");
+  const [startDate, setStartDate] = useState("");
   const [closeDate, setCloseDate] = useState("");
   const [date, setDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState({ audit: false, close: false });
+  const { onCreateAudit } = useAudit();
+  const { authState } = useAuth();
+
+  const userId = authState.user.id;
 
   const toggleDatepicker = (field) => {
     setShowPicker((prev) => ({ ...prev, [field]: !prev[field] }));
@@ -94,7 +40,7 @@ const Form = () => {
         toggleDatepicker(field);
 
         if (field === "audit") {
-          setAuditDate(formatDate(currentDate));
+          setStartDate(formatDate(currentDate));
         } else if (field === "close") {
           setCloseDate(formatDate(currentDate));
         }
@@ -117,6 +63,52 @@ const Form = () => {
     return `${day}-${month}-${year}`;
   };
 
+  const formatToDatabaseDate = (date) => {
+    const dateObj = new Date(date);
+    const year = dateObj.getFullYear();
+    const month = (dateObj.getMonth() + 1).toString().padStart(2, "0");
+    const day = dateObj.getDate().toString().padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const navigation = useNavigation();
+
+  const handleForm = async () => {
+    if (!title || !area || !startDate || !closeDate) {
+      Alert.alert("Error", "All fields are required!");
+      return;
+    }
+
+    const formattedStartDate = formatToDatabaseDate(startDate);
+    const formattedCloseDate = formatToDatabaseDate(closeDate);
+
+    try {
+      const result = await onCreateAudit(
+        title,
+        area,
+        formattedStartDate,
+        formattedCloseDate,
+        userId
+      );
+      console.log("create result:", result);
+
+      if (result?.error) {
+        Alert.alert("Error", result.msg || "Failed to register.");
+        return;
+      }
+
+      Alert.alert("Success", "Account created successfully!");
+      setTitle("");
+      setArea("");
+      setStartDate("");
+      setCloseDate("");
+      navigation.navigate("Data");
+    } catch (error) {
+      Alert.alert("Error", "Something went wrong. Please try again.");
+      console.error(error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Form Audit</Text>
@@ -125,15 +117,15 @@ const Form = () => {
       <TextInput
         style={styles.input}
         placeholder="Masukkan temuan audit"
-        value={auditTitle}
-        onChangeText={setAuditTitle}
+        value={title}
+        onChangeText={setTitle}
       />
 
       <Text style={styles.label}>Area Audit</Text>
       <View style={styles.pickerContainer}>
         <Picker
-          selectedValue={auditArea}
-          onValueChange={(itemValue) => setAuditArea(itemValue)}
+          selectedValue={area}
+          onValueChange={(itemValue) => setArea(itemValue)}
           style={styles.picker}
         >
           <Picker.Item label="Pilih Area Audit" value="" />
@@ -145,46 +137,50 @@ const Form = () => {
       </View>
 
       <Text style={styles.label}>Tanggal Audit</Text>
-      {showPicker.audit && (
-        <DateTimePicker
-          mode="date"
-          display="spinner"
-          value={date}
-          onChange={(e, selectedDate) => onChange("audit", e, selectedDate)}
-        />
-      )}
-      {!showPicker.audit && (
-        <Pressable onPress={() => toggleDatepicker("audit")}>
-          <TextInput
-            style={styles.inputDate}
-            placeholder="Pilih Tanggal Audit"
-            value={auditDate}
-            editable={false}
+      <View style={styles.pickerDateContainer}>
+        {showPicker.audit && (
+          <DateTimePicker
+            mode="date"
+            display="spinner"
+            value={date}
+            onChange={(e, selectedDate) => onChange("audit", e, selectedDate)}
           />
-        </Pressable>
-      )}
+        )}
+        {!showPicker.audit && (
+          <Pressable onPress={() => toggleDatepicker("audit")}>
+            <TextInput
+              style={styles.input}
+              placeholder="Pilih Tanggal Audit"
+              value={startDate}
+              editable={false}
+            />
+          </Pressable>
+        )}
+      </View>
 
-      <Text style={styles.label}>Tanggal Audit Close</Text>
-      {showPicker.close && (
-        <DateTimePicker
-          mode="date"
-          display="spinner"
-          value={date}
-          onChange={(e, selectedDate) => onChange("close", e, selectedDate)}
-        />
-      )}
-      {!showPicker.close && (
-        <Pressable onPress={() => toggleDatepicker("close")}>
-          <TextInput
-            style={styles.inputDate}
-            placeholder="Pilih Tanggal TA Close"
-            value={closeDate}
-            editable={false}
+      <View style={styles.pickerDateContainer}>
+        <Text style={styles.label}>Tanggal Audit Close</Text>
+        {showPicker.close && (
+          <DateTimePicker
+            mode="date"
+            display="spinner"
+            value={date}
+            onChange={(e, selectedDate) => onChange("close", e, selectedDate)}
           />
-        </Pressable>
-      )}
+        )}
+        {!showPicker.close && (
+          <Pressable onPress={() => toggleDatepicker("close")}>
+            <TextInput
+              style={styles.input}
+              placeholder="Pilih Tanggal Audit Close"
+              value={closeDate}
+              editable={false}
+            />
+          </Pressable>
+        )}
+      </View>
 
-      <TouchableOpacity style={styles.registerButton}>
+      <TouchableOpacity style={styles.registerButton} onPress={handleForm}>
         <Text style={styles.registerButtonText}>Submit</Text>
       </TouchableOpacity>
     </View>
@@ -210,18 +206,6 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     color: "#333",
   },
-  // input: {
-  //   width: "100%",
-  //   height: 55,
-  //   borderWidth: 1,
-  //   borderColor: "#ddd",
-  //   borderRadius: 8,
-  //   paddingHorizontal: 15,
-  //   marginBottom: 15,
-  //   fontSize: 16,
-  //   color: "#333",
-  //   backgroundColor: "#fff",
-  // },
   input: {
     width: "100%",
     height: 55,
@@ -234,16 +218,6 @@ const styles = StyleSheet.create({
     color: "#333",
     backgroundColor: "#fff",
   },
-  inputDate: {
-    height: 55,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    marginBottom: 15,
-    color: "#333",
-    backgroundColor: "#fff",
-  },
   pickerContainer: {
     width: "100%",
     height: 55,
@@ -253,6 +227,9 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     justifyContent: "center",
     backgroundColor: "#fff",
+  },
+  pickerDateContainer: {
+    width: "100%",
   },
   picker: {
     width: "100%",
