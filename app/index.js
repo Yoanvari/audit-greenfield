@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import login from "./(auth)/login";
 import register from "./(auth)/register";
 import home from "./(index)/home";
+import editAudit from "./(index)/editAudit";
 
 const Stack = createNativeStackNavigator();
 
@@ -29,11 +30,17 @@ export const Layout = () => {
             component={home}
             options={{ headerShown: false }}
           />
+          <Stack.Screen
+            name="EditAudit"
+            component={editAudit}
+            options={{ headerShown: true }}
+          />
         </>
       ) : (
         <>
           <Stack.Screen name="Login" component={login} />
           <Stack.Screen name="Register" component={register} />
+          <Stack.Screen name="EditAudit" component={editAudit} />
         </>
       )}
     </Stack.Navigator>
