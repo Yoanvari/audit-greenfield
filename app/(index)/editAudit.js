@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useAudit } from "../context/auditContext";
 import { useAuth } from "../context/authContext";
+import { Picker } from "@react-native-picker/picker";
 
 const formatDate = (date) => {
   const d = new Date(date);
@@ -91,12 +92,19 @@ const EditAudit = ({ route, navigation }) => {
       />
 
       <Text style={styles.label}>Area Audit</Text>
-      <TextInput
+      <Picker
+        selectedValue={auditData.area}
         style={styles.input}
-        placeholder="Masukkan area audit"
-        value={auditData.area}
-        onChangeText={(text) => setAuditData({ ...auditData, area: text })}
-      />
+        onValueChange={(itemValue) =>
+          setAuditData({ ...auditData, area: itemValue })
+        }
+      >
+        <Picker.Item label="Pilih Area Audit" value="" />
+        <Picker.Item label="Keuangan" value="Keuangan" />
+        <Picker.Item label="Operasional" value="Operasional" />
+        <Picker.Item label="IT" value="IT" />
+        <Picker.Item label="Sumber Daya Manusia" value="SDM" />
+      </Picker>
 
       <Text style={styles.label}>Tanggal Audit</Text>
       <TextInput

@@ -102,7 +102,7 @@ const Form = () => {
       setArea("");
       setStartDate("");
       setCloseDate("");
-      navigation.navigate("Data");
+      navigation.navigate("Data", { refresh: true });
     } catch (error) {
       Alert.alert("Error", "Something went wrong. Please try again.");
       console.error(error);
