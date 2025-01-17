@@ -3,7 +3,7 @@ import React from "react";
 import { useAuth } from "../context/authContext";
 
 const Profile = ({ navigation }) => {
-  const { onLogout } = useAuth();
+  const { authState, onLogout } = useAuth();
 
   const handleLogout = () => {
     onLogout();
@@ -18,8 +18,14 @@ const Profile = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.registerButton} onPress={handleLogout}>
-        <Text style={styles.registerButtonText}>Logout</Text>
+      {/* Nama Pengguna */}
+      <Text style={styles.name}>{authState.user.name}</Text>
+      {/* Email Pengguna */}
+      <Text style={styles.email}>{authState.user.email}</Text>
+
+      {/* Tombol Logout */}
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <Text style={styles.logoutButtonText}>Logout</Text>
       </TouchableOpacity>
     </View>
   );
@@ -33,16 +39,26 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#f9f9f9",
   },
-  registerButton: {
-    width: "100%",
+  name: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  email: {
+    fontSize: 16,
+    color: "#555",
+    marginBottom: 20,
+  },
+  logoutButton: {
+    width: "80%",
     height: 50,
-    backgroundColor: "#28a745",
+    backgroundColor: "#dc3545", // Warna merah untuk tombol logout
     borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
     marginTop: 20,
   },
-  registerButtonText: {
+  logoutButtonText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
