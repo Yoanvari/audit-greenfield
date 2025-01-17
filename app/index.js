@@ -1,4 +1,5 @@
-import { AuthProvider, useAuth } from "./(auth)/authContext";
+import { AuthProvider, useAuth } from "./context/authContext";
+import { AuditProvider } from "./context/auditContext";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import login from "./(auth)/login";
 import register from "./(auth)/register";
@@ -9,7 +10,9 @@ const Stack = createNativeStackNavigator();
 export default function Index() {
   return (
     <AuthProvider>
-      <Layout></Layout>
+      <AuditProvider>
+        <Layout></Layout>
+      </AuditProvider>
     </AuthProvider>
   );
 }

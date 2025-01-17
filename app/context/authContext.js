@@ -14,19 +14,24 @@ export const AuthProvider = ({ children }) => {
   const [authState, setAuthState] = useState({
     token: null,
     authenticated: null,
+    user: null,
   });
 
   useEffect(() => {
     const loadToken = async () => {
       const token = await SecureStore.getItemAsync(TOKEN_KEY);
+      const userId = await SecureStore.getItemAsync("userId");
       console.log("stored", token);
+      console.log("stored", userId);
 
-      if (token) {
+      if (token && userId) {
         axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
+        const response = await axios.get(`${API_URL}/api/users/${userId}`);
         setAuthState({
           token: token,
           authenticated: true,
+          user: response.data,
         });
       }
     };
@@ -60,6 +65,7 @@ export const AuthProvider = ({ children }) => {
       setAuthState({
         token: result.data.token,
         authenticated: true,
+        user: result.data.data,
       });
 
       axios.defaults.headers.common[
@@ -67,6 +73,7 @@ export const AuthProvider = ({ children }) => {
       ] = `Bearer ${result.data.token}`;
 
       await SecureStore.setItemAsync(TOKEN_KEY, result.data.token);
+      await SecureStore.setItemAsync("userId", String(result.data.data.id));
 
       return result;
     } catch (e) {
@@ -76,6 +83,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     await SecureStore.deleteItemAsync(TOKEN_KEY);
+    await SecureStore.deleteItemAsync("userId");
 
     axios.defaults.headers.common["Authorization"] = "";
 
