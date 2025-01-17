@@ -23,6 +23,23 @@ export const AuditProvider = ({ children }) => {
     }
   };
 
+  const getAuditById = async (id) => {
+    try {
+      const response = await axios.get(`${API_URL}/api/audits/${id}`);
+      console.log("Audit fetched by ID:", response.data);
+      return response.data;
+    } catch (e) {
+      console.error(
+        "Error fetching audit by ID:",
+        e.response?.data || e.message
+      );
+      return {
+        error: true,
+        msg: e.response?.data?.msg || "Failed to fetch audit by ID",
+      };
+    }
+  };
+
   const createAudit = async (
     audit_title,
     audit_area,
@@ -49,9 +66,53 @@ export const AuditProvider = ({ children }) => {
     }
   };
 
+  const updateAudit = async (
+    id,
+    audit_title,
+    audit_area,
+    audit_date,
+    close_date,
+    auditor_id
+  ) => {
+    try {
+      const response = await axios.put(`${API_URL}/api/audits/${id}`, {
+        audit_title,
+        audit_area,
+        audit_date,
+        close_date,
+        auditor_id,
+      });
+      console.log("Audit updated:", response.data);
+      return response.data;
+    } catch (e) {
+      console.error("Error updating audit:", e.response?.data || e.message);
+      return {
+        error: true,
+        msg: e.response?.data?.msg || "Failed to update audit",
+      };
+    }
+  };
+
+  const deleteAudit = async (id) => {
+    try {
+      const response = await axios.delete(`${API_URL}/api/audits/${id}`);
+      console.log("Audit deleted:", response.data);
+      return response.data;
+    } catch (e) {
+      console.error("Error deleting audit:", e.response?.data || e.message);
+      return {
+        error: true,
+        msg: e.response?.data?.msg || "Failed to delete audit",
+      };
+    }
+  };
+
   const value = {
     onCreateAudit: createAudit,
+    onGetAuditById: getAuditById,
     onGetAudits: getAudits,
+    onUpdateAudit: updateAudit,
+    onDeleteAudit: deleteAudit,
   };
 
   return (
