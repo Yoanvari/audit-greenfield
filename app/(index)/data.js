@@ -7,6 +7,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { useAudit } from "../context/auditContext";
 import { useAuth } from "../context/authContext";
@@ -48,6 +49,7 @@ const Data = ({ navigation }) => {
     if (result?.error) {
       console.error(result.msg);
     } else {
+      Alert.alert("Success", "Delete Audit successfully!");
       setAudits(audits.filter((audit) => audit.id !== id));
     }
   };

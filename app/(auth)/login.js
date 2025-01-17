@@ -30,7 +30,7 @@ const Login = ({ navigation }) => {
         return;
       }
 
-      Alert.alert("Success", "Account created successfully!");
+      Alert.alert("Success", "Login successfully!");
       navigation?.navigate("Home");
     } catch (error) {
       Alert.alert("Error", "Something went wrong. Please try again.");

@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import React from "react";
 import { useAuth } from "../context/authContext";
 
@@ -8,6 +8,7 @@ const Profile = ({ navigation }) => {
   const handleLogout = () => {
     onLogout();
     console.log("User logged out");
+    Alert.alert("Success", "Logout successfully!");
     setTimeout(() => {
       navigation.reset({
         index: 0,

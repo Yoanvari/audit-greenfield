@@ -102,8 +102,12 @@ const EditAudit = ({ route, navigation }) => {
         <Picker.Item label="Pilih Area Audit" value="" />
         <Picker.Item label="Keuangan" value="Keuangan" />
         <Picker.Item label="Operasional" value="Operasional" />
-        <Picker.Item label="IT" value="IT" />
+        <Picker.Item label="Keamanan" value="Keamanan" />
         <Picker.Item label="Sumber Daya Manusia" value="SDM" />
+        <Picker.Item label="Pemeliharaan" value="Pemeliharaan" />
+        <Picker.Item label="Proyek" value="Proyek" />
+        <Picker.Item label="Kepatuhan" value="Kepatuhan" />
+        <Picker.Item label="Teknologi Informasi" value="TI" />
       </Picker>
 
       <Text style={styles.label}>Tanggal Audit</Text>
