@@ -23,7 +23,7 @@ const Login = ({ navigation }) => {
     // Proses login
     try {
       const result = await await onLogin(email, password);
-      console.log("login result:", result);
+      console.log("login result:", result.data);
 
       if (result?.error) {
         Alert.alert("Error", result.msg || "Failed to register.");
